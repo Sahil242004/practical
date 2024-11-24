@@ -1,0 +1,66 @@
+Problem Statement:
+1. Create table Student with schema (roll_no, name, division, branch, city, marks)
+2. Insert 10 records to the table students
+3. List all the student names with their corresponding city
+4. List all the distinct names of the students
+5. List all the records of the students with all the attributes
+6. List all the students whose marks are greater than 75
+7. List all the students whose name starts with the alphabet „S‟
+8. List all the students whose marks are in the range of 50 to 60
+9. List all the students whose branch is „computer‟ and city is „Pune‟
+10. Update the branch of a student to „IT‟ whose roll number is 9
+11. Delete the student records whose division is „BE‟
+12. Create another table TE_Students with Schema( roll_no, name)
+13. List all the roll numbers unionly in the relations Student and TE_Students
+14. Display name of all the students belonging to relation Student in Upper case
+15. Display the binary and hex equivalent of marks for all the students belonging to Student relation
+
+--------------------------------
+
+create database assign2;
+use assign2;
+
+create table students(
+roll_no int,
+name varchar(50),
+division varchar(1),
+branch varchar(10),
+city varchar(20),
+marks float
+);
+
+INSERT INTO students (roll_no, name, division, branch, city, marks) VALUES
+(1, 'John Doe', 'A', 'Computer Science', 'New York', 85.5),
+(2, 'Jane Smith', 'B', 'Mechanical', 'Los Angeles', 72.3),
+(3, 'Mark Johnson', 'A', 'Electrical', 'Chicago', 78.9),
+(4, 'Emily Davis', 'C', 'Civil', 'Houston', 90.2),
+(5, 'James Brown', 'B', 'Computer Science', 'Phoenix', 65.8),
+(6, 'Linda Clark', 'A', 'Electrical', 'Philadelphia', 88.1),
+(7, 'Michael Lewis', 'C', 'Mechanical', 'San Antonio', 79.4),
+(8, 'Sarah White', 'A', 'Civil', 'San Diego', 92.0),
+(9, 'David Harris', 'B', 'Computer Science', 'Dallas', 68.7),
+(10, 'Jessica Martin', 'A', 'Mechanical', 'Austin', 77.5);
+
+select name,city from students;
+select distinct(name) from students;
+select * from students;
+select * from students where name like 's%'; 
+select * from students where marks >= 50 and marks <=60;
+select * from students where branch = 'Electrical' and city = 'Chicago';
+
+set sql_safe_updates = 0;
+update students set branch='IT' where roll_no = 9;
+
+delete from students where division = 'B';
+
+create table TE_STUDENTS(roll_no int, name varchar(50));
+
+select roll_no from students
+union
+select roll_no from TE_STUDENTS;
+
+select * from TE_STUDENTS; 
+
+select upper(name) from students;
+
+select roll_no, bin(marks), hex(marks) from students;
