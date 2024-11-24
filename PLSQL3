@@ -1,0 +1,70 @@
+Problem Statement: Write a database trigger on Library table. The System should keep track of the records that are being updated or deleted. The old value of updated or deleted records should be added in 
+Library Audit table.
+
+CREATE TABLE library (
+    book_id NUMBER PRIMARY KEY,
+    book_name VARCHAR2(100),
+    author_name VARCHAR2(100),
+    publish_year NUMBER
+);
+
+-- Step 2: Create the 'audit_library' table to log changes.
+CREATE TABLE audit_library (
+    audit_id NUMBER PRIMARY KEY,
+    book_id NUMBER,
+    old_book_name VARCHAR2(100),
+    new_book_name VARCHAR2(100),
+    old_author_name VARCHAR2(100),
+    new_author_name VARCHAR2(100),
+    old_publish_year NUMBER,
+    new_publish_year NUMBER,
+    operation VARCHAR2(10),
+    changed_on DATE
+);
+
+-- Step 3: Create a trigger to log updates or deletes from the 'library' table.
+CREATE OR REPLACE TRIGGER trg_library_audit
+AFTER UPDATE OR DELETE ON library
+FOR EACH ROW
+BEGIN
+    IF UPDATING THEN
+        INSERT INTO audit_library (
+            audit_id, book_id, old_book_name, new_book_name, old_author_name, 
+            new_author_name, old_publish_year, new_publish_year, operation, changed_on
+        ) VALUES (
+            audit_seq.NEXTVAL, :OLD.book_id, :OLD.book_name, :NEW.book_name, :OLD.author_name, 
+            :NEW.author_name, :OLD.publish_year, :NEW.publish_year, 'UPDATE', SYSDATE
+        );
+    ELSIF DELETING THEN
+        INSERT INTO audit_library (
+            audit_id, book_id, old_book_name, new_book_name, old_author_name, 
+            new_author_name, old_publish_year, new_publish_year, operation, changed_on
+        ) VALUES (
+            audit_seq.NEXTVAL, :OLD.book_id, :OLD.book_name, NULL, :OLD.author_name, 
+            NULL, :OLD.publish_year, NULL, 'DELETE', SYSDATE
+        );
+    END IF;
+END;
+/
+
+-- Step 4: Create a sequence for audit_id.
+CREATE SEQUENCE audit_seq START WITH 1 INCREMENT BY 1;
+
+-- Step 5: Insert some data into the 'library' table.
+INSERT INTO library (book_id, book_name, author_name, publish_year)
+VALUES (1, 'Math', 'Anjani', 2024);
+
+INSERT INTO library (book_id, book_name, author_name, publish_year)
+VALUES (2, 'Dbms', 'Sakshi', 2023);
+
+SELECT * FROM library;
+
+UPDATE library SET book_name = 'Dsa' WHERE book_id = 1;
+
+SELECT * FROM library;
+
+SELECT * FROM audit_library;
+
+DELETE FROM library WHERE book_id = 2;
+SELECT * FROM library;
+SELECT * FROM audit_library;
