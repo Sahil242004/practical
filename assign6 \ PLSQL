@@ -1,0 +1,73 @@
+Write a PL/SQL block of code using parameterized Cursor, that will merge the data available in
+the newly created table N_RollCall with the data available in the table O_Roll-call. If the data in the first
+table already exists in the second table then that data should be skipped.
+
+------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE N_RollCall (
+    Student_ID INT PRIMARY KEY,
+    Student_Name VARCHAR(50),
+    Class VARCHAR(20),
+    Roll_No INT
+);
+
+CREATE TABLE O_RollCall (
+    Student_ID INT PRIMARY KEY,
+    Student_Name VARCHAR(50),
+    Class VARCHAR(20),
+    Roll_No INT
+);
+
+INSERT INTO N_RollCall (Student_ID, Student_Name, Class, Roll_No) 
+VALUES (101, 'Shreya', '10A', 1),
+       (102, 'Suresh', '10B', 2),
+       (103, 'Sanika', '10A', 3);
+
+INSERT INTO O_RollCall (Student_ID, Student_Name, Class, Roll_No) 
+VALUES 
+(101, 'Shreya', '10A', 1),
+(104, 'Ramesh', '10C', 4);
+
+DELIMITER $$
+
+CREATE PROCEDURE merge_rollcall()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_student_id INT;
+    DECLARE v_student_name VARCHAR(50);
+    DECLARE v_class VARCHAR(20);
+    DECLARE v_roll_no INT;
+
+    DECLARE cur CURSOR FOR 
+        SELECT Student_ID, Student_Name, Class, Roll_No FROM N_RollCall;
+        
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+
+    loop_merge: LOOP
+        FETCH cur INTO v_student_id, v_student_name, v_class, v_roll_no;
+        IF done THEN
+            LEAVE loop_merge;
+        END IF;
+
+        -- Check and insert if not exists
+        IF NOT EXISTS (
+            SELECT 1 FROM O_RollCall WHERE Student_ID = v_student_id
+        ) THEN
+            INSERT INTO O_RollCall (Student_ID, Student_Name, Class, Roll_No)
+            VALUES (v_student_id, v_student_name, v_class, v_roll_no);
+        END IF;
+    END LOOP;
+
+    CLOSE cur;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+CALL merge_rollcall();
+
+SELECT * FROM O_RollCall;
+
