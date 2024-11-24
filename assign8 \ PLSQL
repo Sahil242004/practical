@@ -1,0 +1,64 @@
+Write a database trigger on the Library table. The System should keep track of the records that are being updated or deleted. The old value of updated or
+deleted records should be added in the Library Audit table.
+
+-----------------------------------------------------------------------------------------
+
+CREATE TABLE Library (
+    Roll INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Class VARCHAR(20)
+);
+
+-- Create the LibraryAudit table
+CREATE TABLE LibraryAudit (
+    AuditID INT AUTO_INCREMENT PRIMARY KEY,
+    Roll INT,
+    OldName VARCHAR(50),
+    OldClass VARCHAR(20),
+    Action VARCHAR(10),
+    ActionTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create the trigger for BEFORE UPDATE
+DELIMITER $$
+CREATE TRIGGER Before_Library_Update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO LibraryAudit (Roll, OldName, OldClass, Action)
+    VALUES (OLD.Roll, OLD.Name, OLD.Class, 'UPDATE');
+END$$
+DELIMITER ;
+
+-- Create the trigger for BEFORE DELETE
+DELIMITER $$
+CREATE TRIGGER Before_Library_Delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO LibraryAudit (Roll, OldName, OldClass, Action)
+    VALUES (OLD.Roll, OLD.Name, OLD.Class, 'DELETE');
+END$$
+DELIMITER ;
+
+-- Insert sample data into the Library table
+INSERT INTO Library (Roll, Name, Class) VALUES (1, 'Amit', '10A');
+INSERT INTO Library (Roll, Name, Class) VALUES (2, 'Bharat', '10B');
+
+-- Update data in the Library table
+UPDATE Library SET Name = 'Chaaya' WHERE Roll = 1;
+
+-- Check the Library table
+SELECT * FROM Library;
+
+-- Check the LibraryAudit table
+SELECT * FROM LibraryAudit;
+
+-- Delete data from the Library table
+DELETE FROM Library WHERE Roll = 2;
+
+-- Check the Library table
+SELECT * FROM Library;
+
+-- Check the LibraryAudit table
+SELECT * FROM LibraryAudit;
