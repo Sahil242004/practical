@@ -1,0 +1,79 @@
+import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+
+        String query1 = "create table Stud2 (ID int primary key, name varchar(30), marks int)";
+        String query2 = "insert into Stud2(ID, name, marks) values (1,'pratiksha',80), (2,'arya',65), (3,'jiya',70), (4,'sejal',60), (5,'pranjal',75)";
+        String query3 = "select * from Stud2";
+        String query4 = "update Stud2 set marks=50 where ID=3 ";
+        String query5 = "delete from Stud2 where ID=1";
+        String query6 = "alter table Stud2 add dept varchar(20)";
+        String query7 = "alter table Stud2 modify dept varchar(20) default 'CSE-AI'";
+        String query8 = "insert into Stud2(ID, name, marks) values (6,'srinidhi',78) ";
+        String query9 = "alter table Stud2 drop dept";
+
+        try{
+            Connection con = DriverManager.getConnection( "jdbc:mysql://localhost:3306/db1", "root", "@pratiksha1206");
+
+            Statement st = con.createStatement();
+
+            st.executeUpdate(query1);
+            System.out.println("Table created successfully.");
+
+            st.executeUpdate(query2);
+            System.out.println("Data added successfully.");
+            showTableData(st,false);
+
+            st.executeUpdate(query4);
+            System.out.println("Data updated successfully.");
+            showTableData(st,false);
+
+            st.executeUpdate(query5);
+            System.out.println("Data deleted successfully.");
+            showTableData(st,false);
+
+            st.executeUpdate(query6);
+            System.out.println("dept added successfully.");
+
+            st.executeUpdate(query7);
+            System.out.println("dept modified successfully.");
+            showTableData(st,true);
+
+            st.executeUpdate(query8);
+            System.out.println("dept set to CSE-AI as default successfully.");
+            showTableData(st, true);
+
+            st.executeUpdate(query9);
+            System.out.println("dept dropped successfully.");
+            showTableData(st, false);
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void showTableData(Statement st, boolean dept) {
+        String query3 = "select * from Stud2";
+
+        try {
+            if(dept){
+                ResultSet rs = st.executeQuery(query3);
+                while (rs.next()) {
+                    System.out.println("ID: " + rs.getInt("ID") + ", Name: " + rs.getString("name") + ", Marks: " + rs.getInt("marks") + ", Dept: " + rs.getString("dept"));
+                }
+            }else{
+//                System.out.println("Updated data in Stud2:");
+                ResultSet rs = st.executeQuery(query3);
+                while (rs.next()) {
+                    System.out.println("ID: " + rs.getInt("ID") + ", Name: " + rs.getString("name") + ", Marks: " + rs.getInt("marks"));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
