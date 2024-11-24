@@ -1,0 +1,43 @@
+Problem Statement:
+1. Create table Customers with schema (cust_id, cust_name, product, quantity, total_price)
+2. Use sequence/ auto-increment for incrementing customer ID and Insert 5 customer records to the table Customers
+
+CREATE DATABASE trial2;
+USE trial; 
+SHOW tables;
+SHOW DATABASES;
+CREATE TABLE customer(
+cust_id int,
+cust_name varchar(50),
+prdouct varchar(50),
+quantity int,
+total_price int
+);
+
+alter table customer add primary key(cust_id);
+alter table customer modify cust_id int auto_increment;
+
+insert into customer
+(cust_name, prdouct,quantity,total_price)
+values
+("sahil","cycle",1,10000),
+("rohan","iphone",1,50000),
+("vedant","book",1,200),
+("shivam","laptop",1,90000),
+("shekhar","car",1,1200000);
+
+select * from customer;
+
+alter table customer add price_per_qty float;
+create view cust_view as select cust_id, cust_name from customer;
+
+create or replace view cust_view as select cust_id,prdouct,total_price from customer;
+describe cust_view;
+
+drop view cust_view;
+
+create index cust_index on customer(cust_name);
+drop index cust_index on customer;
+
+select * from customer as cust;
+drop table customer;
