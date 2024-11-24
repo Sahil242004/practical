@@ -1,0 +1,90 @@
+DBMS FILES
+
+Problem Statement: Write a PL/ SQL block of code for the following requirements:- Schema:
+1.	Borrower(Rollin, Name, DateofIssue, NameofBook, Status)
+2.	Fine(Roll_no,Date,Amt)
+Accept roll_no & name of book from user.
+Check the number of days (from date of issue), if days are between 15 to 30 then fine amount will be Rs 5per day.If no. of days>30, per day fine will be Rs 50 per day & for days less than 30, Rs. 5 per day.After submitting the book, status will change from I to R. If the condition of fine is true, then details will be stored into a fine table.
+
+1.	Borrower(Rollin, Name, DateofIssue, NameofBook, Status)
+
+
+CREATE DATABASE db11;
+
+USE db11;
+
+CREATE TABLE borrower(
+    roll INT NOT NULL PRIMARY KEY,
+    name VARCHAR(20),
+    dateOfIssue DATE,
+    nameOfBook VARCHAR(25),
+    status VARCHAR(1)
+);
+
+CREATE TABLE fine(
+    roll INT NOT NULL,
+    dateOfReturn DATE,
+    amount FLOAT
+);
+
+INSERT INTO borrower(roll, name, dateOfIssue, nameOfBook, status) 
+VALUES 
+(1, 'pratiksha', '2024-01-12', 'TOC', 'I'),
+(2, 'pratik', '2024-02-22', 'Burry', 'I'),
+(3, 'prashika', '2024-03-28', 'capital', 'I'),
+(4, 'sakshi', '2024-04-30', 'All spaces', 'I');
+
+SELECT * FROM borrower;
+DELIMITER $$
+
+CREATE PROCEDURE calfine(
+    IN r_roll INT,
+    IN r_nameOfBook VARCHAR(25)
+)
+BEGIN
+    DECLARE r_dateOfIssue DATE;
+    DECLARE r_status CHAR(1);
+    DECLARE r_days INT;
+    DECLARE r_fine DECIMAL(10,2);
+
+    SELECT dateOfIssue, status INTO r_dateOfIssue, r_status 
+    FROM borrower 
+    WHERE roll = r_roll AND nameOfBook = r_nameOfBook;
+
+    SET r_days = DATEDIFF(CURDATE(), r_dateOfIssue);
+
+    
+    SET r_fine = 0;
+
+    IF r_days > 15 AND r_days <= 30 THEN 
+        SET r_fine = r_days * 5;
+    ELSEIF r_days > 30 THEN 
+        SET r_fine = r_days * 50;
+    END IF;
+
+    
+    IF r_fine > 0 THEN
+        INSERT INTO fine(roll, dateOfReturn, amount)
+        VALUES(r_roll, CURDATE(), r_fine);
+    END IF;
+    UPDATE borrower
+    SET status = 'R'
+    WHERE roll = r_roll AND nameOfBook = r_nameOfBook;
+
+    
+    SELECT r_fine AS Fine_Amount;
+END$$
+
+DELIMITER;
+
+CALL calfine(2, 'Burry');
+
+SELECT * FROM borrower;
+
+SELECT * FROM fine;
+
+--------------------------------------------------------------------------------------------------------
+
+
+
+
