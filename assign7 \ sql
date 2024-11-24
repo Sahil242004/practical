@@ -1,0 +1,125 @@
+Write a Stored Procedure namely proc_Grade for the categorization of students. If marks scored by students in examination is <=1500 and marks>=990 then
+students will be placed in distinction category if marks scored are between 989 and900 category is first class, if marks 899 and 825 category is Higher
+Second Class. Write a PL/SQL block for using procedures created with the above requirement. Stud_Marks(name, total_marks) Result(Roll,Name, Class)
+
+---------------------------------------------------------------------
+
+CREATE TABLE Stud_Marks (
+    name VARCHAR(50),
+    total_marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Class VARCHAR(20)
+);
+
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Amit', 1150);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Sneha', 920);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Rahul', 860);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Sita', 780);
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    DECLARE v_class VARCHAR(20);
+
+    -- Use cursor for looping
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur_name VARCHAR(50);
+    DECLARE cur_marks INT;
+    DECLARE cur_roll INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT ROW_NUMBER() OVER (ORDER BY name) AS Roll, name, total_marks FROM Stud_Marks;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    grade_loop: LOOP
+        FETCH cur INTO cur_roll, cur_name, cur_marks;
+        IF done THEN
+            LEAVE grade_loop;
+        END IF;
+
+        -- Assign class based on marks
+        IF cur_marks >= 990 AND cur_marks <= 1500 THEN
+            SET v_class = 'Distinction';
+        ELSEIF cur_marks >= 900 AND cur_marks < 990 THEN
+            SET v_class = 'First Class';
+        ELSEIF cur_marks >= 825 AND cur_marks < 900 THEN
+            SET v_class = 'Higher Second Class';
+        ELSE
+            SET v_class = 'No Category';
+        END IF;
+
+        -- Insert data into Result table
+        INSERT INTO Result (Roll, Name, Class)
+        VALUES (cur_roll, cur_name, v_class);
+    END LOOP;
+
+    CLOSE cur;
+END$$
+
+DELIMITER ;
+
+CALL proc_Grade();
+
+SELECT * FROM Stud_Marks;
+SELECT * FROM Result;
+
+DELIMITER $$
+
+CREATE FUNCTION get_Grade(p_marks INT) RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    DECLARE v_class VARCHAR(20);
+
+    IF p_marks >= 990 AND p_marks <= 1500 THEN
+        SET v_class = 'Distinction';
+    ELSEIF p_marks >= 900 AND p_marks < 990 THEN
+        SET v_class = 'First Class';
+    ELSEIF p_marks >= 825 AND p_marks < 900 THEN
+        SET v_class = 'Higher Second Class';
+    ELSE
+        SET v_class = 'No Category';
+    END IF;
+
+    RETURN v_class;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur_name VARCHAR(50);
+    DECLARE cur_marks INT;
+    DECLARE cur_roll INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT ROW_NUMBER() OVER (ORDER BY name) AS Roll, name, total_marks FROM Stud_Marks;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    grade_loop: LOOP
+        FETCH cur INTO cur_roll, cur_name, cur_marks;
+        IF done THEN
+            LEAVE grade_loop;
+        END IF;
+
+        -- Use the function to calculate grade
+        INSERT INTO Result (Roll, Name, Class)
+        VALUES (cur_roll, cur_name, get_Grade(cur_marks));
+    END LOOP;
+
+    CLOSE cur;
+END$$
+
+DELIMITER ;
