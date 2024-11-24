@@ -1,0 +1,74 @@
+Problem Statement:
+1. Create table Customers with schema (ID, name, age, address, salary)
+2. Create table Orders with Schema(O_ID, o_date, customer_id, amount)
+3. Insert 5 records to each table keeping few customer ids common to both the tables
+4. Perform the inner join on customers and orders table to enlist the id, name, amount and o_date
+5. Perform the left outer join on customers and orders table to enlist the id, name, amount and o_date
+6. Perform the right outer join on customers and orders table to enlist the id, name, amount and o_date
+7. Perform the full outer join on customers and orders table to enlist the id, name, amount and o_date by using „union all‟ set operation
+8. Perform the self join on customers table to enlist the pair of customers belonging to same address
+9. Perform the Cross/ Cartesian join on customers and orders table to enlist the id, name, amount and o_date
+10. Design the sub query with select statement for displaying all the details of the customers having salary greater than 20000
+11. Create a backup table- „cust_bkp‟ of the table customers by using insert statement with the subquery
+12. Update the salaries by 10% of all the customers(in customers table) having age greater than or equals to 24 by using sub query with update clause( by using backup table cust_bkp)
+13. Delete all the customers having age greater than 26 by using delete clause with the subquery
+
+-------------------------------------------------------------------------------------------------------
+
+create database assign4;
+
+use assign4;
+
+create table customers(
+id int,
+name varchar(50),
+age int,
+address varchar(100),
+salary int
+);
+
+create table orders(
+o_id int,
+o_date date,
+cust_id int,
+amount float
+);
+
+INSERT INTO customers (id, name, age, address, salary) VALUES
+(1, 'Alice Johnson', 30, '123 Elm St, Springfield', 50000),
+(2, 'Bob Smith', 45, '456 Oak St, Riverside', 60000),
+(3, 'Charlie Brown', 25, '789 Pine St, Lakeside', 45000),
+(4, 'David Lee', 38, '321 Maple St, Hilltop', 55000),
+(5, 'Eve Davis', 50, '654 Birch St, Seaside', 70000);
+
+INSERT INTO orders (o_id, o_date, cust_id, amount) VALUES
+(101, '2024-11-20', 1, 250.75),
+(102, '2024-11-21', 2, 300.50),
+(103, '2024-11-22', 3, 150.00),
+(104, '2024-11-23', 4, 500.00),
+(105, '2024-11-24', 1, 275.25);
+
+select customers.id, customers.name, orders.amount, orders.o_date from customers inner join orders on customers.id = orders.cust_id; 
+
+select customers.id, customers.name, orders.amount, orders.o_date from customers left outer join orders on customers.id = orders.cust_id;
+
+select customers.id, customers.name, orders.amount, orders.o_date from customers right outer join orders on customers.id = orders.cust_id;
+
+SELECT customers.id, customers.name, orders.amount, orders.o_date from customers left outer join orders on customers.id = orders.cust_id
+union all
+select orders.cust_id, customers.name, orders.amount, orders.o_date from orders left outer join customers on orders.cust_id = customers.id;
+
+select customers.address from customers self join customers on customers.address = customers.address; 
+
+select customers.id, customers.name, orders.amount,orders.o_date from customers cross join orders; 
+
+select * from customers where salary>(select salary from customers where salary = 20000);
+
+create table cust_bkp as select * from customers;
+
+SET SQL_SAFE_UPDATES = 0;
+update customers set salary=salary*1.1 where id in (select id from cust_bkp where age >=24);
+
+delete from customers where id in (select id from cust_bkp where age > 26);
+ 
+
