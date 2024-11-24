@@ -1,0 +1,66 @@
+Problem Statement:
+1.	Create Collection Employee
+2.	Insert 5 documents to Employee
+3.	Read all the documents
+4.	Display all the documents in a formatted manner
+5.	Insert another 3 documents with a single insert command
+6.	Insert one document using save () method instead of insert () method
+7.	Read all the employees whose name is „Joe‟ and age is 25
+8.	Read all the employees whose salary is greater than 5000
+9.	Update the department of employee „Joe‟ from „Production‟ to „Operations‟
+10.	Increment the salary of „Joe‟ by Rs. 2000
+11.	Add email Id for „Joe‟ (using $AddToSet modifier with update)
+12.	Remove all the documents for the employees belonging to „Operations‟ department
+13.	Sort all the documents according to the name of employees
+14.	Display only first three documents
+15.	Display all the documents except first 4
+16.	Use all the administrative commands of MongoDB
+ ----------------------------------------------
+
+db.createCollection("employee")
+
+db.employee.insertMany([
+    { name: "Sahil", age: 25, salary: 4000, department: "Production" },
+    { name: "Aditi", age: 30, salary: 5000, department: "HR" },
+    { name: "Raj", age: 35, salary: 6000, department: "Sales" },
+    { name: "Meera", age: 28, salary: 4500, department: "Marketing" },
+    { name: "Anil", age: 40, salary: 7000, department: "Finance" }
+]);
+
+db.employee.find()
+
+db.employee.find().pretty()
+
+db.employee.insertOne({ name: "Priya", age: 29, salary: 4800, department: "IT" });
+db.employee.insertOne({ name: "Vikas", age: 32, salary: 5200, department: "Logistics" });
+db.employee.insertOne({ name: "Neha", age: 27, salary: 4700, department: "R&D" });
+
+db.employee.save({ 
+    name: "Pooja", 
+    age: 26, 
+    salary: 4600, 
+    department: "Operations" 
+});
+
+db.employee.find({name: "Sahil", age:25})
+
+db.employee.find({salary: {$gt:5000}})
+
+db.employee.updateOne({name: "Sahil", department: "Production"}, {$set: {department: "Operations"}})
+
+db.employee.updateOne({name: "Sahil"},{$inc: {salary:2000}})
+
+db.employee.updateOne({name: "Sahil"},{$addToSet: {email: "sahilbhagwat73@gmail.com"}})
+
+db.employee.deleteMany({department: "Operations"})
+
+db.employee.find().sort({name: 1})
+
+db.employee.find().limit(3)
+
+db.employee.find().skip(4)
+
+show dbs
+use assign10
+show collections
+db.employee.drop
