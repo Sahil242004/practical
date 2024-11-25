@@ -1,0 +1,55 @@
+Implement Map Reduce operation with suitable examples using MongoDB.
+
+-------------------------------------------------------------------
+
+// Create the collection 'Staff' and insert records
+db.Staff.insertMany([
+    { name: "Amit", age: 30, address: "Pune" },
+    { name: "Amit", age: 25, address: "Mumbai" },
+    { name: "Priya", age: 28, address: "Delhi" },
+    { name: "Priya", age: 32, address: "Bangalore" },
+    { name: "Ravi", age: 35, address: "Hyderabad" }
+]);
+
+// Show the collection after creation
+db.Staff.find().pretty();
+
+// Define the map function
+var mapFunction = function() {
+    emit(this.name, this.age);
+};
+
+// Define the reduce function
+var reduceFunction = function(key, values) {
+    return Array.sum(values);
+};
+
+// Apply the Map-Reduce operation
+db.Staff.mapReduce(
+    mapFunction,
+    reduceFunction,
+    { out: "StaffSummary" }
+);
+
+// View the result of the Map-Reduce operation
+db.StaffSummary.find().pretty();
+
+// Add an entry to the 'Staff' collection
+db.Staff.insertOne({ name: "Ravi", age: 40, address: "Chennai" });
+db.Staff.find().pretty();
+
+// Delete an entry from the 'Staff' collection
+db.Staff.deleteOne({ name: "Amit", age: 25 });
+db.Staff.find().pretty();
+
+// Update an entry in the 'Staff' collection
+db.Staff.updateOne(
+    { name: "Priya", age: 28 },
+    { $set: { address: "Kolkata" } }
+);
+db.Staff.find().pretty();
+
+// Drop the 'StaffSummary' collection
+db.StaffSummary.drop();
+db.StaffSummary.find().pretty();
+
