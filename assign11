@@ -1,0 +1,86 @@
+Implement aggregation and indexing with suitable examples using MongoDB
+
+------------------------------------------------------------
+
+// 1. Create Collection `Product` and insert documents
+db.Product.insertMany([
+    { name: "M-sand", company: "Anand Trading", cost: 5610 },
+    { name: "Sea sand", company: "Gauri Enterprises", cost: 2340 },
+    { name: "Fine sand", company: "Ramesh Trading", cost: 7860 }
+]);
+
+// 2. Aggregate documents by grouping company name and displaying minimum and maximum product costs
+db.Product.aggregate([
+    {
+        $group: {
+            _id: "$company",
+            minCost: { $min: "$cost" },
+            maxCost: { $max: "$cost" }
+        }
+    }
+]);
+
+// 3. Sort the result by company name
+db.Product.find().sort({ company: 1 });
+
+// 4. Display number of documents in the collection
+db.Product.countDocuments();
+
+// 5. Display distinct company names
+db.Product.distinct("company");
+
+// 6. Display company name with its count of documents
+db.Product.aggregate([
+    {
+        $group: {
+            _id: "$company",
+            count: { $sum: 1 }
+        }
+    }
+]);
+
+// 7. Limit the result to one document
+db.Product.find().limit(1);
+
+// 8. Skip the first two documents and display the rest
+db.Product.find().skip(2);
+
+// 9. Insert 10 documents into the `staff` collection using a for loop
+for (let i = 1; i <= 10; i++) {
+    db.staff.insertOne({
+        Staff_id: i,
+        staff_name: "Staff " + i,
+        age: 20 + i
+    });
+}
+
+// 10. Find the document where `Staff_id` is 2 and explain parameters
+db.staff.find({ Staff_id: 2 }).explain("executionStats");
+
+// 11. Create an index on `staff_name`
+db.staff.createIndex({ staff_name: 1 });
+
+// 12. Run the query for point 10 again to observe changes in parameters
+db.staff.find({ Staff_id: 2 }).explain("executionStats");
+
+// 13. Find the document where `age` is 40 and `staff_name` is "Karan"
+db.staff.find({ age: 40, staff_name: "Karan" }).explain("executionStats");
+
+// 14. Create a compound index on `age` and `staff_name`
+db.staff.createIndex({ age: 1, staff_name: 1 });
+
+// 15. Run the query for point 13 again and observe the index used
+db.staff.find({ age: 40, staff_name: "Karan" }).explain("executionStats");
+
+// 16. Drop the compound index and run the query for point 13 again
+db.staff.dropIndex({ age: 1, staff_name: 1 });
+db.staff.find({ age: 40, staff_name: "Karan" }).explain("executionStats");
+
+// 17. Drop the index on `staff_name` and run the query for point 10 again
+db.staff.dropIndex({ staff_name: 1 });
+db.staff.find({ Staff_id: 2 }).explain("executionStats");
+
+// 18. Create a unique index on `staff_name` and test for duplicates
+db.staff.createIndex({ staff_name: 1 }, { unique: true });
+db.staff.insertOne({ Staff_id: 11, staff_name: "Staff 1", age: 30 });
+
